@@ -6,31 +6,26 @@ import qrcode
 from datetime import date
 
 # --- 1. SISTEMA DE LOGIN ---
-# Inicializamos la variable de estado si no existe
 if 'autenticado' not in st.session_state:
     st.session_state['autenticado'] = False
 
-# Si el usuario no está autenticado, mostramos la pantalla de login
 if not st.session_state['autenticado']:
     st.title("🔒 Acceso Restringido")
     st.subheader("Sistema de Emisión RUAM")
     
     usuario = st.text_input("Usuario")
-    contrasena = st.text_input("Contraseña", type="password") # El type="password" oculta los caracteres
+    contrasena = st.text_input("Contraseña", type="password")
     
     if st.button("Ingresar"):
-        # Aquí defines las credenciales de acceso permitidas
         if usuario == "admin" and contrasena == "123456": 
             st.session_state['autenticado'] = True
-            st.rerun() # Recarga la página para ocultar el login y mostrar la app
+            st.rerun()
         else:
             st.error("Usuario o contraseña incorrectos")
 
 # --- 2. APLICACIÓN PRINCIPAL ---
-# Todo este bloque solo se ejecuta si el login fue exitoso
 if st.session_state['autenticado']:
     
-    # Agregamos un botón en la barra lateral para poder salir
     if st.sidebar.button("Cerrar Sesión"):
         st.session_state['autenticado'] = False
         st.rerun()
@@ -43,6 +38,10 @@ if st.session_state['autenticado']:
         titular = st.text_input("Titular (Empresa/Persona)")
         cantera = st.text_input("Nombre de la Cantera")
         mineral = st.text_input("Mineral (Ej: Extracción de Arena Silícea)")
+        
+        # --- AQUÍ ESTÁ EL NUEVO CAMPO DE ACTIVIDAD ---
+        actividad = st.text_input("Actividad (Ej: Explotación de cantera en dominio particular)")
+        
         domicilio = st.text_input("Domicilio Legal")
         vig_ruam = st.date_input("Vigencia RUAM")
         vig_ambiente = st.date_input("Vigencia Certificado Aptitud Ambiental")
@@ -62,11 +61,13 @@ if st.session_state['autenticado']:
         imagen_qr = InlineImage(doc, qr_buffer, width=Mm(35))
         fecha_hoy = date.today().strftime("%d/%m/%Y")
         
+        # --- AQUÍ SE MAPEA LA ACTIVIDAD PARA ENVIARLA AL WORD ---
         contexto = {
             "nro_productor": nro_productor,
             "titular": titular,
             "cantera": cantera,
             "mineral": mineral,
+            "actividad": actividad,
             "domicilio": domicilio,
             "vig_ruam": vig_ruam.strftime("%d/%m/%Y"),
             "vig_ambiente": vig_ambiente.strftime("%d/%m/%Y"),
